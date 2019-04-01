@@ -15,9 +15,8 @@ class CreateOrderDetailsTable extends Migration
     {
         Schema::create('order_details', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('order_detail_id')->unique();
-            $table->integer('order_master_id')->unsigned();
-            $table->foreign('order_master_id')->references('id')->on('order_masters');
+            $table->integer('payment_id')->unsigned();
+            $table->foreign('payment_id')->references('id')->on('payments');
             $table->integer('product_id')->unsigned();
             $table->foreign('product_id')->references('id')->on('products');
             $table->integer('venue_id')->unsigned();
@@ -28,10 +27,8 @@ class CreateOrderDetailsTable extends Migration
             $table->foreign('modifier_id')->references('id')->on('product_modifiers');
             $table->decimal('costperpc',8,2)->unsigned();
             $table->integer('totalpc')->unsigned();            
-            $table->integer('returnedpc')->unsigned()->default('0');            
             $table->enum('status',['ordered','booked','packaged','courier','delivered','cancelled'])->default('ordered');
             $table->timestamp('order_date')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->dateTime('returned_date')->nullable();
             $table->dateTime('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->dateTime('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });

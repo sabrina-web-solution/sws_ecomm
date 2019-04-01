@@ -4,7 +4,7 @@ namespace App\Models\User;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Profile extends Model
+class Cart extends Model
 {
     /**
      * The attributes that are mass assignable.
@@ -12,7 +12,7 @@ class Profile extends Model
      * @var array
      */
     protected $fillable = [
-        'user_id', 'fname', 'lname','gender','birthdate','mobile','marital_status','images'
+        'user_id', 'guest_id', 'product_id','venue_id','merchant_id','modifier_id','costperpc','totalpc'
     ];
 
     /**

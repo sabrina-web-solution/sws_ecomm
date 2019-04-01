@@ -15,17 +15,14 @@ class CreatePaymentsTable extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('payment_id')->unique();
+            $table->integer('order_code')->unsigned();
+            $table->string('stripe_token')->unique();
             $table->integer('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users');
-            $table->integer('order_master_id')->unsigned();
-            $table->foreign('order_master_id')->references('id')->on('order_masters');
-            $table->decimal('totalamount',10,2)->default('0.0');
-            $table->decimal('cancelamount',10,2)->default('0.0');
-            $table->integer('totalitems')->default('0');
-            $table->integer('returneditems')->default('0');            
             $table->timestamp('order_date')->default(DB::raw('CURRENT_TIMESTAMP'));
-            $table->dateTime('returned_date')->nullable();
+            $table->decimal('totalamount',10,2)->default('0.0');
+            $table->integer('totalitems')->default('0');
+            $table->enum('status',['ordered','booked','packaged','courier','delivered','cancelled'])->default('ordered');
             $table->dateTime('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->dateTime('updated_at')->default(DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
         });
