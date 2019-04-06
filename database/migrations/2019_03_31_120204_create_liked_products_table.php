@@ -15,6 +15,8 @@ class CreateLikedProductsTable extends Migration
     {
         Schema::create('liked_products', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('system_id')->unsigned();
+            $table->foreign('system_id')->references('id')->on('system_type');
             $table->integer('user_id')->nullable();
             $table->string('guest_id')->nullable();
             $table->integer('product_id')->unsigned();

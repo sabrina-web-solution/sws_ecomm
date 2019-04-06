@@ -15,6 +15,28 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
+Route::group(['namespace'=>'User'], function(){
 
-Route::get('/home', 'HomeController@index')->name('home');
+
+
+});
+
+Route::group(['middleware'=>'adminAuth'],function(){
+	Route::resource('product','ProductController',['except'=>'show']);
+	Route::resource('venue','VenueController',['except'=>'show']);
+	Route::resource('merchant','MerchantController',['except'=>'show']);
+	Route::resource('productbrand','ProductBrandController',['except'=>'show']);
+	Route::resource('productcategory','ProductCategoryController',['except'=>'show']);
+	Route::resource('productmodifier','ProductModifierController',['except'=>'show']);
+	Route::resource('product','ProductController',['except'=>'show']);
+});
+
+Route::group(['middleware'=>'userAuth'],function(){
+	Route::resource('product','ProductController',['except'=>'show']);
+	Route::resource('venue','VenueController',['except'=>'show']);
+	Route::resource('merchant','MerchantController',['except'=>'show']);
+	Route::resource('productbrand','ProductBrandController',['except'=>'show']);
+	Route::resource('productcategory','ProductCategoryController',['except'=>'show']);
+	Route::resource('productmodifier','ProductModifierController',['except'=>'show']);
+	Route::resource('product','ProductController',['except'=>'show']);
+});
