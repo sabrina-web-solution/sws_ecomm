@@ -1,0 +1,5 @@
+
+a:active, a:hover, a:visited, a:focus{
+	text-decoration: none;
+	font-weight: 600;
+}

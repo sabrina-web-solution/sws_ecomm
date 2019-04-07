@@ -15,25 +15,35 @@ use App\Models\User\WishlistProduct;
 
 class CartController extends Controller
 {
-    public function _construct()
+    protected $system_id;
+    protected $user_id;
+    protected $guest_id;
+
+    public function __construct()
     {
-        $user_id = $guest = null;
-        if(Auth::user()){
-            $user_id = Auth::id();
-        } else {
-            if(!isset($_COOKIE['sws_guest'])){
-                $guest = Session::getId();
-                setcookie('sws_guest', $guest, time() + (86400*30), "/" );
+        $this->middleware(function ($request, $next) {
+            $this->system_id = getSystemId();
+            $this->user_id = $this->guest_id = null;
+            
+            if(Auth::id()){
+                $this->user_id = Auth::id();
+                Cookie::queue(Cookie::forget('sws_guest_id'));
             } else {
-                $guest = $_COOKIE['sws_guest'];
+                if(!isset($_COOKIE['sws_guest_id'])){
+                    $this->guest_id = Session::getId();
+                    setcookie('sws_guest_id', $this->guest_id, time() + 86400 * 30,"/");
+                } else {
+                    $this->guest_id = $_COOKIE['sws_guest_id'];
+                }
             }
-        }
+            return $next($request);
+        });
     }
 
     public function getCartDetails(Request $request)
     {
         $cartdata = $cart_details = $likes_details = $wish_details = [];
-        $carts   =      Cart::where('system_type',$system_type)->where('user_id',$user_id)->where('guest',$guest)->get();
+        $carts   =      Cart::where('system_id',$this->system_id)->where('user_id',$this->user_id)->where('guest_id',$this->guest_id)->get();
         if(!empty($carts) && count($carts)){
             foreach ($carts as $key => $cart) {
                 $cartdata[]   =     [
@@ -47,7 +57,7 @@ class CartController extends Controller
                                     ];
                 }
         }
-        $wishes = WishlistProduct::where('system_type',$system_type)->where('user_id',$user_id)->where('guest',$guest)->get();
+        $wishes = WishlistProduct::where('system_id',$this->system_id)->where('user_id',$this->user_id)->where('guest_id',$this->guest_id)->get();
         if(!empty($wishes) && count($wishes)){
             foreach ($wishes as $key => $cart) {
                 $cartdata[]   =     [
@@ -61,7 +71,7 @@ class CartController extends Controller
                                     ];
                 }
         }
-        $likes = LikedProduct::where('system_type',$system_type)->where('user_id',$user_id)->where('guest',$guest)->get();
+        $likes = LikedProduct::where('system_id',$this->system_id)->where('user_id',$this->user_id)->where('guest_id',$this->guest_id)->get();
         if(!empty($likes) && count($likes)){
             foreach ($likes as $key => $cart) {
                 $cartdata[]   =     [
@@ -75,6 +85,7 @@ class CartController extends Controller
                                     ];
                 }
         }
+        
         $result = json_decode(getDetails("getProductDetails",$cartdata));
         foreach ($result->data as $key => $data1) {
             if($data1->received_details->type=='Cart'){ $cart_details[] = $data1->details; }
@@ -86,18 +97,18 @@ class CartController extends Controller
 
     public function addCart(Request $request){
         try {
-                $cart   =   Cart::where('system_type',$system_type)
-                                ->where('user_id' , $user_id)
-                                ->where('guest' , $guest)
+                $cart   =   Cart::where('system_id',$this->system_id)
+                                ->where('user_id' , $this->user_id)
+                                ->where('guest_id' , $guest_id)
                                 ->where('product_id' , $request->product_id)
                                 ->where('venue_id'  , $request->venue_id)
                                 ->where('merchant_id', $request->merchant_id)
                                 ->where('modifier_id', $request->modifier_id)
                                 ->where('offer_id',$request->offer_id)
                                 ->first();
-                $wishes =   WishlistProduct::where('system_type',$system_type)
-                                ->where('user_id' , $user_id)
-                                ->where('guest' , $guest)
+                $wishes =   WishlistProduct::where('system_id',$this->system_id)
+                                ->where('user_id' , $this->user_id)
+                                ->where('guest_id' , $guest_id)
                                 ->where('product_id' , $request->product_id)
                                 ->where('venue_id'  , $request->venue_id)
                                 ->where('merchant_id', $request->merchant_id)
@@ -110,9 +121,9 @@ class CartController extends Controller
                 } else {
                         $cart = new Cart;
                         $cart = [
-                            'system_type'   => $system_type,
+                            'system_id'   => $this->system_id,
                             'user_id'       => $request->user_id,
-                            'guest'         => $request->guest,
+                            'guest_id'         => $request->guest_id,
                             'product_id'    => $request->product_id,
                             'venue_id'      => $request->venue_id,
                             'merchant_id'   => $request->merchant_id,
@@ -125,17 +136,17 @@ class CartController extends Controller
                        if($wishes){ $wishes->destroy();}
                        $message = "Item is added to cart";
                 }
-                return response()->json(['status'=>200,'message'=>$message, 'flag'=>1]);
+                return response()->json(['status'=>200,'message'=>$message,'cart'=>$cart]);
         } catch (Exception $e) {
-            return response()->json(['status'=>200,'message'=>$e->getMessaage()]);
+            return response()->json(['status'=>400,'message'=>$e->getMessaage()]);
         }
     }
 
     public function addWishlist(Request $request){
         try {
-                $wishlists = WishlistProduct::where('system_type',$system_type)
-                                        ->where('user_id' , $user_id)
-                                        ->where('guest' , $guest)
+                $wishlists = WishlistProduct::where('system_id',$this->system_id)
+                                        ->where('user_id' , $this->user_id)
+                                        ->where('guest_id' , $guest_id)
                                         ->where('product_id' , $request->product_id)
                                         ->where('venue_id'  , $request->venue_id)
                                         ->where('merchant_id', $request->merchant_id)
@@ -148,9 +159,9 @@ class CartController extends Controller
                 } else {
                         $wishlists = new WishlistProduct;
                         $wishlists = [
-                            'system_type'   => $system_type,
+                            'system_id'   => $this->system_id,
                             'user_id'       => $request->user_id,
-                            'guest'         => $request->guest,
+                            'guest_id'         => $request->guest_id,
                             'product_id'    => $request->product_id,
                             'venue_id'      => $request->venue_id,
                             'merchant_id'   => $request->merchant_id,
@@ -168,9 +179,9 @@ class CartController extends Controller
 
     public function addLikedProduct(Request $request){
         try {
-                $likes =    LikedProduct::where('system_type',$system_type)
-                                        ->where('user_id' , $user_id)
-                                        ->where('guest' , $guest)
+                $likes =    LikedProduct::where('system_id',$this->system_id)
+                                        ->where('user_id' , $this->user_id)
+                                        ->where('guest_id' , $guest_id)
                                         ->where('product_id' , $request->product_id)
                                         ->where('venue_id'  , $request->venue_id)
                                         ->where('merchant_id', $request->merchant_id)
@@ -183,9 +194,9 @@ class CartController extends Controller
                 } else {
                         $likes = new LikedProduct;
                         $likes = [
-                            'system_type'   => $system_type,
+                            'system_id'   => $this->system_id,
                             'user_id'       => $request->user_id,
-                            'guest'         => $request->guest,
+                            'guest_id'         => $request->guest_id,
                             'product_id'    => $request->product_id,
                             'venue_id'      => $request->venue_id,
                             'merchant_id'   => $request->merchant_id,

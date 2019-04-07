@@ -12,13 +12,18 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('website.welcome');
+});
+
+Route::get('welcomme', function () {
+    return view('website.welcome');
 });
 
 Route::group(['namespace'=>'User'], function(){
-
-
-
+Route::get('cart','CartController@getCartDetails')->name('cart');
+Route::post('addCart','CartController@addCart');
+Route::post('addWishlist','CartController@addWishlist');
+Route::post('addLikedProduct','CartController@addLikedProduct');
 });
 
 Route::group(['middleware'=>'adminAuth'],function(){
