@@ -63,29 +63,37 @@ if (!function_exists('flashMessage')) {
 
 function getDetails($url, $data=null){
     
-    $curl = curl_init();
-    $URL  = getApiUrl() . $url;
-    
+    // $curl = curl_init();
     $data['system_id'] = getSystemId();
-    curl_setopt_array($curl, array(
-        CURLOPT_URL                 => $URL,
-        CURLOPT_RETURNTRANSFER      => true,
-        CURLOPT_ENCODING            => "",
-        CURLOPT_MAXREDIRS           => 10,
-        CURLOPT_TIMEOUT             => 30000,
-        CURLOPT_HTTP_VERSION        => CURL_HTTP_VERSION_1_1,
-        CURLOPT_HEADER              => false,
-        CURLOPT_POST                => 1,
-        CURLOPT_RETURNTRANSFER      => true,
-        CURLOPT_CUSTOMREQUEST       => "GET",
-        CURLOPT_POSTFIELDS          => json_encode($data),
-        CURLOPT_HTTPHEADER          => getApiHeader()
-    ));
+    $URL  = getApiUrl() . $url.'?data='.json_encode($data);
 
-    $result     = curl_exec($curl);
-    $err        = curl_error($curl);
-    curl_close($curl);
-    dd($result);
+    $client1     = new Client;
+    $result1     = $client1->get($cart_api);
+    if($result1->getStatusCode()==200){
+    $data1 = json_decode($result1->getBody()->getContents());
+    $cart_details = $data1->cartDatas;
+    }
+
+    // dd($data);
+    // curl_setopt_array($curl, array(
+    //     CURLOPT_URL                 => $URL,
+    //     CURLOPT_RETURNTRANSFER      => true,
+    //     CURLOPT_ENCODING            => "",
+    //     CURLOPT_MAXREDIRS           => 10,
+    //     CURLOPT_TIMEOUT             => 30000,
+    //     CURLOPT_HTTP_VERSION        => CURL_HTTP_VERSION_1_1,
+    //     CURLOPT_HEADER              => false,
+    //     CURLOPT_POST                => 1,
+    //     CURLOPT_RETURNTRANSFER      => true,
+    //     CURLOPT_CUSTOMREQUEST       => "GET",
+    //     CURLOPT_POSTFIELDS          => json_encode($data),
+    //     CURLOPT_HTTPHEADER          => getApiHeader()
+    // ));
+
+    // $result     = curl_exec($curl);
+    // $err        = curl_error($curl);
+    // curl_close($curl);
+    // dd($result);
     return $result->getBody()->getContents();
 }
 
@@ -109,12 +117,7 @@ function postDetails($url, $data=null){
     ));
 
     $result     = curl_exec($curl);
-    // $err        = curl_error($curl);
+    $err        = curl_error($curl);
     curl_close($curl);
     return $result->getBody()->getContents();
-}
-
-function getAvailability($url, $data=null)
-{
-
 }

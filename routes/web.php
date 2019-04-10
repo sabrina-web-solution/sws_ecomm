@@ -20,28 +20,17 @@ Route::get('welcomme', function () {
 });
 
 Route::group(['namespace'=>'User'], function(){
-Route::get('cart','CartController@getCartDetails')->name('cart');
-Route::post('addCart','CartController@addCart');
-Route::post('addWishlist','CartController@addWishlist');
-Route::post('addLikedProduct','CartController@addLikedProduct');
+	Route::get('cart','CartController@getCartDetails')->name('cart');
+	Route::post('addCart','CartController@addCart');
+	Route::post('addWishlist','CartController@addWishlist');
+	Route::post('addLikedProduct','CartController@addLikedProduct');
+	Route::get('order','OrderController@getOrderDetails');
+	Route::post('addOrder','OrderController@addOrder');
+	Route::post('cancelOrder','OrderController@cancelOrder');
+	Route::post('returnOrder','OrderController@returnOrder');
 });
 
-Route::group(['middleware'=>'adminAuth'],function(){
-	Route::resource('product','ProductController',['except'=>'show']);
-	Route::resource('venue','VenueController',['except'=>'show']);
-	Route::resource('merchant','MerchantController',['except'=>'show']);
-	Route::resource('productbrand','ProductBrandController',['except'=>'show']);
-	Route::resource('productcategory','ProductCategoryController',['except'=>'show']);
-	Route::resource('productmodifier','ProductModifierController',['except'=>'show']);
-	Route::resource('product','ProductController',['except'=>'show']);
-});
-
-Route::group(['middleware'=>'userAuth'],function(){
-	Route::resource('product','ProductController',['except'=>'show']);
-	Route::resource('venue','VenueController',['except'=>'show']);
-	Route::resource('merchant','MerchantController',['except'=>'show']);
-	Route::resource('productbrand','ProductBrandController',['except'=>'show']);
-	Route::resource('productcategory','ProductCategoryController',['except'=>'show']);
-	Route::resource('productmodifier','ProductModifierController',['except'=>'show']);
-	Route::resource('product','ProductController',['except'=>'show']);
-});
+Route::get('getProductDetails','EcommController@getProductDetails');
+Route::get('getOfferDetails','EcommController@getOfferDetails');
+Route::get('getPrice','EcommController@getPrice');
+Route::get('getVenueMerchantDetails','EcommController@getVenueMerchantDetails');

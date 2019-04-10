@@ -4,6 +4,8 @@ namespace App\Http\Controllers\User;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Client;
 
 use Auth;
 use Session;
@@ -40,14 +42,15 @@ class CartController extends Controller
         });
     }
 
-    public function getCartDetails(Request $request)
-    {
+    public function getCartDetails(Request $request){
         $cartdata = $cart_details = $likes_details = $wish_details = [];
+
         $carts   =      Cart::where('system_id',$this->system_id)->where('user_id',$this->user_id)->where('guest_id',$this->guest_id)->get();
         if(!empty($carts) && count($carts)){
             foreach ($carts as $key => $cart) {
                 $cartdata[]   =     [
                                         'type'          =>    'Cart',
+                                        'system_id'     =>    $cart->system_id,
                                         'merchant_id'   =>    $cart->merchant_id,
                                         'venue_id'      =>    $cart->venue_id,
                                         'product_id'    =>    $cart->product_id,
@@ -57,11 +60,13 @@ class CartController extends Controller
                                     ];
                 }
         }
+
         $wishes = WishlistProduct::where('system_id',$this->system_id)->where('user_id',$this->user_id)->where('guest_id',$this->guest_id)->get();
         if(!empty($wishes) && count($wishes)){
             foreach ($wishes as $key => $cart) {
                 $cartdata[]   =     [
                                         'type'          =>    'Wish',
+                                        'system_id'     =>    $cart->system_id,
                                         'merchant_id'   =>    $cart->merchant_id,
                                         'venue_id'      =>    $cart->venue_id,
                                         'product_id'    =>    $cart->product_id,
@@ -71,11 +76,13 @@ class CartController extends Controller
                                     ];
                 }
         }
+
         $likes = LikedProduct::where('system_id',$this->system_id)->where('user_id',$this->user_id)->where('guest_id',$this->guest_id)->get();
         if(!empty($likes) && count($likes)){
             foreach ($likes as $key => $cart) {
                 $cartdata[]   =     [
                                         'type'          =>    'Likes',
+                                        'system_id'     =>    $cart->system_id,
                                         'merchant_id'   =>    $cart->merchant_id,
                                         'venue_id'      =>    $cart->venue_id,
                                         'product_id'    =>    $cart->product_id,
@@ -85,12 +92,22 @@ class CartController extends Controller
                                     ];
                 }
         }
-        
-        $result = json_decode(getDetails("getProductDetails",$cartdata));
-        foreach ($result->data as $key => $data1) {
-            if($data1->received_details->type=='Cart'){ $cart_details[] = $data1->details; }
-            else if($data1->received_details->type=='Wish'){ $wish_details[] = $data1->details; }
-            else { $likes_details[] = $data1->details; }
+        if($cartdata)
+        {
+            $URL         =  getApiUrl() . 'getProductDetails?data='.json_encode($cartdata);
+            
+            $client1     = new Client;
+            $result1     = $client1->get($URL);
+            
+            if($result1->getStatusCode()==200){
+
+                $data = json_decode($result1->getBody()->getContents());
+                foreach ($result->data as $key => $data1) {
+                    if($data1->received_details->type=='Cart'){ $cart_details[] = $data1->details; }
+                    else if($data1->received_details->type=='Wish'){ $wish_details[] = $data1->details; }
+                    else { $likes_details[] = $data1->details; }
+                }
+            }
         }
         return view('website.cart',compact('cart_details','wish_details','likes_details'));
     }

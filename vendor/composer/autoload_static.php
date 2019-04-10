@@ -407,7 +407,6 @@ class ComposerStaticInit45457023898d6ca6be2c3ee3f7eba99c
         'App\\Http\\Controllers\\Auth\\VerificationController' => __DIR__ . '/../..' . '/app/Http/Controllers/Auth/VerificationController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
         'App\\Http\\Controllers\\HomeController' => __DIR__ . '/../..' . '/app/Http/Controllers/HomeController.php',
-        'App\\Http\\Controllers\\OrderMasterController' => __DIR__ . '/../..' . '/app/Http/Controllers/OrderMasterController.php',
         'App\\Http\\Controllers\\User\\AddressController' => __DIR__ . '/../..' . '/app/Http/Controllers/User/AddressController.php',
         'App\\Http\\Controllers\\User\\CartController' => __DIR__ . '/../..' . '/app/Http/Controllers/User/CartController.php',
         'App\\Http\\Controllers\\User\\EcommController' => __DIR__ . '/../..' . '/app/Http/Controllers/User/EcommController.php',
